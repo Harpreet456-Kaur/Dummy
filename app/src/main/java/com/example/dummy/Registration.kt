@@ -44,14 +44,15 @@ class Registration : Fragment() {
         binding = FragmentRegistrationBinding.inflate(layoutInflater)
 
         binding.btn.setOnClickListener {
-            submitForm()
+//            submitForm()
+            findNavController().navigate(R.id.login)
         }
         emailFocusListener()
 
 //        val spinner: Spinner = findViewById(R.id.countrySpinner)
         val countries = arrayOf("+1","+41","+91")
         val arrayAdapter = ArrayAdapter(requireActivity(),android.R.layout.simple_spinner_dropdown_item, countries)
-        binding.countrySpinner.adapter = arrayAdapter
+//        binding.countrySpinner.adapter = arrayAdapter
 
 
         return binding.root
@@ -207,8 +208,6 @@ class Registration : Fragment() {
 //        )
 //        val spinner: Spinner = findViewById(R.id.countrySpinner)
 
-
-    }
 
 
     companion object {

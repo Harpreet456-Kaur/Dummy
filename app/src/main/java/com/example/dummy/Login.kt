@@ -1,10 +1,20 @@
 package com.example.dummy
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.dummy.adapter.CountryAdapter
+import com.example.dummy.databinding.FragmentLoginBinding
+import com.example.dummy.models.ApiResponse
+import com.example.dummy.models.Response
+import com.example.dummy.retrofit.API
+import com.example.dummy.retrofit.Instance
+import retrofit2.Call
+import retrofit2.Callback
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -20,6 +30,11 @@ class Login : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    lateinit var binding: FragmentLoginBinding
+    lateinit var countryAdapter: CountryAdapter
+//    var studentList=ArrayList<Response>()
+//    var showUserList=ArrayList<Response>()
+    var arrayList = ArrayList<Response>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +49,36 @@ class Login : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        binding = FragmentLoginBinding.inflate(layoutInflater)
+
+
+
+        countryAdapter = CountryAdapter(arrayList)
+        binding.country.layoutManager = LinearLayoutManager(requireActivity())
+
+        binding.country.adapter = countryAdapter
+//        return inflater.inflate(R.layout.fragment_login, container, false)
+
+
+        Instance.countryInstance().create(API::class.java).countryName("Bearer 21|LBuf4K0GuIQpIqSps8PFevJnUPOZlLThX280ZbAdd6800d6e")
+            .enqueue(object : Callback<ApiResponse?>{
+                override fun onResponse(
+                    call: Call<ApiResponse?>,
+                    response: retrofit2.Response<ApiResponse?>,
+                ) {
+                    val res = response.body()
+                    Log.d("TAG--->", response.body()?.data.toString())
+                    arrayList.addAll(response.body()?.data ?: arrayListOf())
+                    countryAdapter.notifyDataSetChanged()
+                }
+
+                override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
+                    Log.d("TAG--->",t.message.toString())
+                }
+
+            })
+
+        return binding.root
     }
 
     companion object {
