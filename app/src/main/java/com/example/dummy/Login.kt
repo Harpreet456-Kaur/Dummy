@@ -1,18 +1,22 @@
 package com.example.dummy
 
+import android.R
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dummy.adapter.CountryAdapter
+import com.example.dummy.adapter.CountryApiHelper
 import com.example.dummy.databinding.FragmentLoginBinding
 import com.example.dummy.models.ApiResponse
 import com.example.dummy.models.Response
 import com.example.dummy.retrofit.API
-import com.example.dummy.retrofit.Instance
+import com.example.dummy.retrofit.RetrofitClient
+import com.example.dummy.retrofit.RetrofitClient.countryApi
 import retrofit2.Call
 import retrofit2.Callback
 
@@ -35,6 +39,10 @@ class Login : Fragment() {
 //    var studentList=ArrayList<Response>()
 //    var showUserList=ArrayList<Response>()
     var arrayList = ArrayList<Response>()
+//    private lateinit var countryApiHelper: CountryApiHelper
+
+    val api = RetrofitClient.countryApi
+    val call = countryApi.countryName("Bearer 21|LBuf4K0GuIQpIqSps8PFevJnUPOZlLThX280ZbAdd6800d6e")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +50,9 @@ class Login : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+//        countryApiHelper = CountryApiHelper(this)
+//        countryApiHelper.getCountries()
+
     }
 
     override fun onCreateView(
@@ -54,31 +65,60 @@ class Login : Fragment() {
 
 
         countryAdapter = CountryAdapter(arrayList)
-        binding.country.layoutManager = LinearLayoutManager(requireActivity())
+//        binding.country.layoutManager = LinearLayoutManager(requireActivity())
+//
+//        binding.country.adapter = countryAdapter
 
-        binding.country.adapter = countryAdapter
 //        return inflater.inflate(R.layout.fragment_login, container, false)
 
 
-        Instance.countryInstance().create(API::class.java).countryName("Bearer 21|LBuf4K0GuIQpIqSps8PFevJnUPOZlLThX280ZbAdd6800d6e")
-            .enqueue(object : Callback<ApiResponse?>{
-                override fun onResponse(
-                    call: Call<ApiResponse?>,
-                    response: retrofit2.Response<ApiResponse?>,
-                ) {
-                    val res = response.body()
-                    Log.d("TAG--->", response.body()?.data.toString())
-                    arrayList.addAll(response.body()?.data ?: arrayListOf())
-                    countryAdapter.notifyDataSetChanged()
-                }
+//        Instance.countryInstance().create(API::class.java).countryName("Bearer 21|LBuf4K0GuIQpIqSps8PFevJnUPOZlLThX280ZbAdd6800d6e")
+//            .enqueue(object : Callback<ApiResponse?>{
+//                override fun onResponse(
+//                    call: Call<ApiResponse?>,
+//                    response: retrofit2.Response<ApiResponse?>,
+//                ) {
+//                    val res = response.body()
+//                    Log.d("TAG--->", response.body()?.data.toString())
+//                    arrayList.addAll(response.body()?.data ?: arrayListOf())
+//                    countryAdapter.notifyDataSetChanged()
+//                }
+//
+//                override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
+//                    Log.d("TAG--->",t.message.toString())
+//                }
+//
+//            })
 
-                override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
-                    Log.d("TAG--->",t.message.toString())
+        call.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(
+                call: Call<ApiResponse>,
+                response: retrofit2.Response<ApiResponse>,
+            ) {
+                if (response.isSuccessful) {
+                    val countries = response.body()
+                    countries?.let {
+                        populateCountrySpinner(listOf(it))
+                    }
+                } else {
+                    // Handle unsuccessful response
                 }
+            }
 
-            })
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+        })
+
+
 
         return binding.root
+    }
+
+    private fun populateCountrySpinner(countries: List<ApiResponse>) {
+        val countryNames = countries.map { it.data }
+        val adapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_dropdown_item, countryNames)
+        binding.countrySpinner.adapter = adapter
     }
 
     companion object {
@@ -101,3 +141,14 @@ class Login : Fragment() {
             }
     }
 }
+
+//    override fun onCountriesLoaded(countries: List<ApiResponse>) {
+//        val countryNames = countries.map { it.data }
+//        val adapter = ArrayAdapter(requireActivity(), R.layout.simple_spinner_dropdown_item, countryNames)
+//        binding.countrySpinner.adapter = adapter
+//    }
+//
+//    override fun onError(error: String) {
+//
+//    }
+//}
